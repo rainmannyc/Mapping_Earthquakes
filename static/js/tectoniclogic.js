@@ -30,11 +30,12 @@ let baseMaps = {
 
 // 1. Add a 2nd layer group for the tectonic plate data.
 let allEarthquakes = new L.LayerGroup();
-
+let tectonicPlates = new L.LayerGroup();
 
 // 2. Add a reference to the tectonic plates group to the overlays object.
 let overlays = {
-  "Earthquakes": allEarthquakes
+  "Earthquakes": allEarthquakes,
+  "Tectonic Plates": tectonicPlates
 };
 
 // Then we add a control to the map that will allow the user to change which
@@ -50,12 +51,12 @@ d3.json("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geoj
   function styleInfo(feature) {
     return {
       opacity: 1,
-      fillOpacity: 1,
+      fillOpacity: 0.7,
       fillColor: getColor(feature.properties.mag),
       color: "#000000",
       radius: getRadius(feature.properties.mag),
       stroke: true,
-      weight: 0.5
+      weight: 0.4
     };
   }
 
@@ -100,7 +101,7 @@ d3.json("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geoj
      // We create a popup for each circleMarker to display the magnitude and location of the earthquake
      //  after the marker has been created and styled.
      onEachFeature: function(feature, layer) {
-      layer.bindPopup("Magnitude: " + feature.properties.mag + "<br>Location: " + feature.properties.place);
+      layer.bindPopup("Magnitude: " + feature.properties.mag + "<hr>Location: " + feature.properties.place);
     }
   }).addTo(allEarthquakes);
 
@@ -139,9 +140,15 @@ legend.onAdd = function() {
   // Finally, we our legend to the map.
   legend.addTo(map);
 
-
   // 3. Use d3.json to make a call to get our Tectonic Plate geoJSON data.
-  d3.json().then(() {
-    
+  d3.json("https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_boundaries.json").then(function(data) {
+        // Create a GeoJSON Layer the plateData
+        L.geoJson(data, {
+          color: "#8b987b",
+          weight: 2
+      // Add plateData to tectonicPlates LayerGroups 
+      }).addTo(tectonicPlates);
+      // Add tectonicPlates Layer to the Map
+      tectonicPlates.addTo(myMap);
   });
 });
